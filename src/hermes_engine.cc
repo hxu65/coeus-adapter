@@ -406,12 +406,8 @@ void HermesEngine::DoPutSync_(const adios2::core::Variable<T> &variable,
   client.Mdm_insertRoot(DomainId::GetLocal(), db_op);
 
 #ifdef Meta_enabled
-    char processor_name[MPI_MAX_PROCESSOR_NAME];
-    int name_len;
-    MPI_Get_processor_name(processor_name, &name_len);
-    std::string processor(processor_name);
+    std::string processor = "FORTRAN";
     int pid = static_cast<int>(getpid());
-    std::cout << pid << std::endl;
     metaInfo metaInfo(variable, adiosOpType::put, Hermes->bkt->name, name, processor, pid);
   meta_logger_put->info("MetaData: {}", metaInfoToString(metaInfo));
 
@@ -436,12 +432,9 @@ void HermesEngine::DoPutDeferred_(
   DbOperation db_op(currentStep, rank, std::move(vm), name, std::move(blobInfo));
        client.Mdm_insertRoot(DomainId::GetLocal(), db_op);
 #ifdef Meta_enabled
-    char processor_name[MPI_MAX_PROCESSOR_NAME];
-    int name_len;
-    MPI_Get_processor_name(processor_name, &name_len);
-    std::string processor(processor_name);
+
+    std::string processor = "FORTRAN";
    int pid = static_cast<int>(getpid());
-    std::cout << pid << std::endl;
     metaInfo metaInfo(variable, adiosOpType::put, Hermes->bkt->name, name, processor, pid);
   meta_logger_put->info("MetaData: {}", metaInfoToString(metaInfo));
 

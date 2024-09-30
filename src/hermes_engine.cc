@@ -157,7 +157,9 @@ void HermesEngine::Init_() {
   } else {
     throw std::invalid_argument("db_file not found in parameters");
   }
-
+  if(params.find("adiosOutput") != params.end()) {
+      adiosOutput = params["adiosOutput"];
+  }
   open = true;
 
 
@@ -198,7 +200,7 @@ adios2::StepStatus HermesEngine::BeginStep(adios2::StepMode mode,
     }
     LoadMetadata();
   }
-  std::string bucket_name = "step_" + std::to_string(currentStep)
+  std::string bucket_name = adiosOutput + "_step_" + std::to_string(currentStep)
       + "_rank" + std::to_string(rank);
   Hermes->GetBucket(bucket_name);
 

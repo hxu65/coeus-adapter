@@ -278,17 +278,11 @@ int main(int argc, char *argv[])
           {start1, 0, 0}, {count1, shape[1], shape[2]}));
 
       // Declare variables to output
-//      var_u_pdf = writer_io.DefineVariable<double>(
-//          "U/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
-//      var_v_pdf = writer_io.DefineVariable<double>(
-//          "V/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
+      var_u_pdf = writer_io.DefineVariable<double>(
+          "U/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
+      var_v_pdf = writer_io.DefineVariable<double>(
+          "V/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
 
-        var_u_out = writer_io.DefineVariable<double>(
-                "U", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
-                {count1, shape[1], shape[2]});
-        var_v_out = writer_io.DefineVariable<double>(
-                "V", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
-                {count1, shape[1], shape[2]});
       if (shouldIWrite)
       {
         var_u_bins = writer_io.DefineVariable<double>("U/bins", {nbins},
@@ -362,8 +356,8 @@ int main(int argc, char *argv[])
 
 //     write U, V, and their norms out
     writer.BeginStep();
-    writer.Put<double>(var_u_pdf, u.data());
-    writer.Put<double>(var_v_pdf, v.data());
+    writer.Put<double>(var_u_pdf, pdf_u.data());
+    writer.Put<double>(var_v_pdf, pdf_v.data());
     if (shouldIWrite)
     {
       writer.Put<double>(var_u_bins, bins_u.data());

@@ -364,10 +364,7 @@ int main(int argc, char *argv[])
       writer.Put<double>(var_v_bins, bins_v.data());
       writer.Put<int>(var_step_out, simStep);
     }
-    if (write_inputvars)
-    {
-        continue;
-    }
+
     writer.EndStep();
     ++stepAnalysis;
   }

@@ -300,6 +300,15 @@ int main(int argc, char *argv[])
         var_v_out = writer_io.DefineVariable<double>(
             "V", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
             {count1, shape[1], shape[2]});
+          auto PDFU = writer_io.DefineDerivedVariable("derive/hashU",
+                                               "x = U \n"
+                                               "hash(x)",
+                                               adios2::DerivedVarType::StoreData);
+
+          auto PDFV = writer_io.DefineDerivedVariable("derive/hashV",
+                                               "x = V \n"
+                                               "hash(x)",
+                                               adios2::DerivedVarType::StoreData);
       }
       firstStep = false;
     }

@@ -366,8 +366,7 @@ int main(int argc, char *argv[])
     }
     if (write_inputvars)
     {
-      writer.Put<double>(var_u_out, u.data());
-      writer.Put<double>(var_v_out, v.data());
+        continue;
     }
     writer.EndStep();
     ++stepAnalysis;

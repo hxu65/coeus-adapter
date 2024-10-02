@@ -349,20 +349,20 @@ int main(int argc, char *argv[])
     std::pair<double, double> minmax_u;
     std::pair<double, double> minmax_v;
     auto mmu = std::minmax_element(u.begin(), u.end());
-    minmax_u = std::make_pair(*mmu.first, *mmu.second);
+   // minmax_u = std::make_pair(*mmu.first, *mmu.second);
     auto mmv = std::minmax_element(v.begin(), v.end());
-    minmax_v = std::make_pair(*mmv.first, *mmv.second);
+  //  minmax_v = std::make_pair(*mmv.first, *mmv.second);
 
 //    // Compute PDF
     std::vector<double> pdf_u;
     std::vector<double> bins_u;
-    compute_pdf(u, shape, start1, count1, nbins, minmax_u.first,
-                minmax_u.second, pdf_u, bins_u);
+   // compute_pdf(u, shape, start1, count1, nbins, minmax_u.first,
+    //            minmax_u.second, pdf_u, bins_u);
 //
     std::vector<double> pdf_v;
     std::vector<double> bins_v;
-    compute_pdf(v, shape, start1, count1, nbins, minmax_v.first,
-                minmax_v.second, pdf_v, bins_v);
+   // compute_pdf(v, shape, start1, count1, nbins, minmax_v.first,
+   //             minmax_v.second, pdf_v, bins_v);
 
 //     write U, V, and their norms out
     writer.BeginStep();
@@ -370,9 +370,9 @@ int main(int argc, char *argv[])
       writer.Put<double>(var_v_out, v.data());
     if (shouldIWrite)
     {
-      writer.Put<double>(var_u_bins, bins_u.data());
-      writer.Put<double>(var_v_bins, bins_v.data());
-      writer.Put<int>(var_step_out, simStep);
+    //  writer.Put<double>(var_u_bins, bins_u.data());
+    //  writer.Put<double>(var_v_bins, bins_v.data());
+    //  writer.Put<int>(var_step_out, simStep);
     }
 
     writer.EndStep();

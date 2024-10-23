@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
       << " Start: (" << concatenateVectorToString(var_v_in.Start()) << ") "
       << " Shape: (" << concatenateVectorToString(var_v_in.Shape()) << ") "
       << std::endl;
-
+      std::cout << "rank: " << rank << "; count1: " << count1 << " ;start1:" << start1 << std::endl;
     reader.Get<double>(var_u_in, u);
     reader.Get<double>(var_v_in, v);
     if (shouldIWrite)

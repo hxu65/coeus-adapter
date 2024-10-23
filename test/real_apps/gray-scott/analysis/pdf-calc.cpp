@@ -261,6 +261,7 @@ int main(int argc, char *argv[])
       // 1D decomposition
       count1 = shape[0] / comm_size;
       start1 = count1 * rank;
+      std::cout << "rank: " << rank << "; count1: " << count1 << " ;start1:" << start1 << std::endl;
       if (rank == comm_size - 1)
       {
         // last process need to read all the rest of slices

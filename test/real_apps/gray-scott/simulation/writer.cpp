@@ -177,7 +177,7 @@ void Writer::write(int step, const GrayScott &sim, int rank)
         writer.BeginStep();
         writer.Put<int>(var_step, &step);
         writer.Put<double>(var_u, u.data());
-        std::cout << "U size" << u.size();
+        std::cout << "RANK" << rank <<  "; U size" << u.size() << std::endl;
         writer.Put<double>(var_v, v.data());
         writer.EndStep();
     }

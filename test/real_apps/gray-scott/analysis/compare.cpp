@@ -42,75 +42,7 @@ bool epsilon(float d) { return (d < 1.0e-20); }
 /*
  * Function to compute the PDF of a 2D slice
  */
-template <class T>
-void compute_pdf(const std::vector<T> &data,
-                 const std::vector<std::size_t> &shape, const size_t start,
-                 const size_t count, const size_t nbins, const T min,
-                 const T max, std::vector<T> &pdf, std::vector<T> &bins)
-{
-    if (shape.size() != 3)
-        throw std::invalid_argument("ERROR: shape is expected to be 3D\n");
 
-    size_t slice_size = shape[1] * shape[2];
-    pdf.resize(count * nbins);
-    bins.resize(nbins);
-
-    size_t start_data = 0;
-    size_t start_pdf = 0;
-
-    T binWidth = (max - min) / nbins;
-    for (auto i = 0; i < nbins; ++i)
-    {
-        bins[i] = min + (i * binWidth);
-    }
-
-    if (nbins == 1)
-    {
-        // special case: only one bin
-        for (auto i = 0; i < count; ++i)
-        {
-            pdf[i] = slice_size;
-        }
-        return;
-    }
-
-    if (epsilon(max - min) || epsilon(binWidth))
-    {
-        // special case: constant array
-        for (auto i = 0; i < count; ++i)
-        {
-            pdf[i * nbins + (nbins / 2)] = slice_size;
-        }
-        return;
-    }
-
-    for (auto i = 0; i < count; ++i)
-    {
-        // Calculate a PDF for 'nbins' bins for values between 'min' and 'max'
-        // from data[ start_data .. start_data+slice_size-1 ]
-        // into pdf[ start_pdf .. start_pdf+nbins-1 ]
-        for (auto j = 0; j < slice_size; ++j)
-        {
-            if (data[start_data + j] > max || data[start_data + j] < min)
-            {
-                std::cout << " data[" << start * slice_size + start_data + j
-                          << "] = " << data[start_data + j]
-                          << " is out of [min,max] = [" << min << "," << max
-                          << "]" << std::endl;
-            }
-            size_t bin = static_cast<size_t>(
-                    std::floor((data[start_data + j] - min) / binWidth));
-            if (bin == nbins)
-            {
-                bin = nbins - 1;
-            }
-            ++pdf[start_pdf + bin];
-        }
-        start_pdf += nbins;
-        start_data += slice_size;
-    }
-    return;
-}
 
 /*
  * Print info to the user on how to invoke the application

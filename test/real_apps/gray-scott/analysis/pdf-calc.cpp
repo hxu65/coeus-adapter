@@ -87,8 +87,7 @@ int main(int argc, char *argv[])
   if (argc >= 4)
   {
     int value = std::stoi(argv[3]);
-    if (value > 0)
-      nbins = static_cast<size_t>(value);
+
   }
 
   if (argc >= 5)

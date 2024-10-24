@@ -63,9 +63,7 @@ int main(int argc, char *argv[])
     auto app_start_time = std::chrono::high_resolution_clock::now();
   MPI_Init(&argc, &argv);
   int rank, comm_size, wrank;
-
   MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
-
   const unsigned int color = 2;
   MPI_Comm comm;
   MPI_Comm_split(MPI_COMM_WORLD, color, wrank, &comm);

@@ -330,8 +330,8 @@ int main(int argc, char *argv[])
       std::cout << "rank: " << rank << "; count1: " << count1 << " ;start1:" << start1 << std::endl;
     reader.Get<double>(var_u_in, u);
     reader.Get<double>(var_v_in, v);
-      std::cout << "Size of u: " << u.size() << std::endl;
-      std::cout << "Size of v: " << v.size() << std::endl;
+      std::cout << "rank: " << rank << "; Size of u: " << u.size() << std::endl;
+      std::cout << "rank: " << rank << "; Size of v: " << v.size() << std::endl;
     if (shouldIWrite)
     {
       std::cout << "Get step: " << rank << std::endl;

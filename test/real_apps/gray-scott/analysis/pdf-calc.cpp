@@ -273,10 +273,10 @@ int main(int argc, char *argv[])
           << "}" << std::endl;*/
 
         // Set selection
-        var_u_in.SetSelection(adios2::Box<adios2::Dims>(
-                {start1, 0, 0}, {count1, shape[1], shape[2]}));
-        var_v_in.SetSelection(adios2::Box<adios2::Dims>(
-                {start1, 0, 0}, {count1, shape[1], shape[2]}));
+//        var_u_in.SetSelection(adios2::Box<adios2::Dims>(
+//                {start1, 0, 0}, {count1, shape[1], shape[2]}));
+//        var_v_in.SetSelection(adios2::Box<adios2::Dims>(
+//                {start1, 0, 0}, {count1, shape[1], shape[2]}));
 
         // Declare variables to output
        // var_u_pdf = writer_io.DefineVariable<double>(

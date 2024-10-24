@@ -248,26 +248,25 @@ int main(int argc, char *argv[])
 
     // Set the selection at the first step only, assuming that
     // the variable dimensions do not change across timesteps
-    if (firstStep)
-    {
-      shape = var_u_in.Shape();
+    if (firstStep) {
+        shape = var_u_in.Shape();
 
-      // Calculate global and local sizes of U and V
-      u_global_size = shape[0] * shape[1] * shape[2];
-      u_local_size = u_global_size / comm_size;
-      v_global_size = shape[0] * shape[1] * shape[2];
-      v_local_size = v_global_size / comm_size;
+        // Calculate global and local sizes of U and V
+        u_global_size = shape[0] * shape[1] * shape[2];
+        u_local_size = u_global_size / comm_size;
+        v_global_size = shape[0] * shape[1] * shape[2];
+        v_local_size = v_global_size / comm_size;
 
-      // 1D decomposition
-      count1 = shape[0] / comm_size;
-      start1 = count1 * rank;
-      std::cout << "rank: " << rank << "; count1: " << count1 << " ;start1:" << start1 << std::endl;
-      if (rank == comm_size - 1)
-      {
-        // last process need to read all the rest of slices
-        count1 = shape[0] - count1 * (comm_size - 1);
-      }
-
+        // 1D decomposition
+        count1 = shape[0] / comm_size;
+        start1 = count1 * rank;
+        std::cout << "rank: " << rank << "; count1: " << count1 << " ;start1:" << start1 << std::endl;
+        if (rank == comm_size - 1) {
+            // last process need to read all the rest of slices
+            count1 = shape[0] - count1 * (comm_size - 1);
+        }
+        firstStep = false;
+    }
       /*std::cout << "  rank " << rank << " slice start={" <<  start1
         << ",0,0} count={" << count1  << "," << shape[1] << "," <<
         shape[2]
@@ -312,8 +311,8 @@ int main(int argc, char *argv[])
                                                "hash(x)",
                                                adios2::DerivedVarType::StoreData);
       }
-      firstStep = false;
-    }
+
+
 
     // Read adios2 data
 

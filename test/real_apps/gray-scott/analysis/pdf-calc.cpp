@@ -265,55 +265,52 @@ int main(int argc, char *argv[])
             // last process need to read all the rest of slices
             count1 = shape[0] - count1 * (comm_size - 1);
         }
+
+
+        /*std::cout << "  rank " << rank << " slice start={" <<  start1
+          << ",0,0} count={" << count1  << "," << shape[1] << "," <<
+          shape[2]
+          << "}" << std::endl;*/
+
+        // Set selection
+        var_u_in.SetSelection(adios2::Box<adios2::Dims>(
+                {start1, 0, 0}, {count1, shape[1], shape[2]}));
+        var_v_in.SetSelection(adios2::Box<adios2::Dims>(
+                {start1, 0, 0}, {count1, shape[1], shape[2]}));
+
+        // Declare variables to output
+       // var_u_pdf = writer_io.DefineVariable<double>(
+       //         "U/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
+       // var_v_pdf = writer_io.DefineVariable<double>(
+       //         "V/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
+
+        if (shouldIWrite) {
+
+        }
+
+        if (write_inputvars) {
+            var_u_out = writer_io.DefineVariable<double>(
+                    "U", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
+                    {count1, shape[1], shape[2]});
+            var_v_out = writer_io.DefineVariable<double>(
+                    "V", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
+                    {count1, shape[1], shape[2]});
+            auto PDFU = writer_io.DefineDerivedVariable("derive/hashU",
+                                                        "x = U \n"
+                                                        "hash(x)",
+                                                        adios2::DerivedVarType::StoreData);
+
+            auto PDFV = writer_io.DefineDerivedVariable("derive/hashV",
+                                                        "x = V \n"
+                                                        "hash(x)",
+                                                        adios2::DerivedVarType::StoreData);
+        }
         firstStep = false;
     }
-      /*std::cout << "  rank " << rank << " slice start={" <<  start1
-        << ",0,0} count={" << count1  << "," << shape[1] << "," <<
-        shape[2]
-        << "}" << std::endl;*/
-
-      // Set selection
       var_u_in.SetSelection(adios2::Box<adios2::Dims>(
-          {start1, 0, 0}, {count1, shape[1], shape[2]}));
+              {start1, 0, 0}, {count1, shape[1], shape[2]}));
       var_v_in.SetSelection(adios2::Box<adios2::Dims>(
-          {start1, 0, 0}, {count1, shape[1], shape[2]}));
-
-      // Declare variables to output
-      var_u_pdf = writer_io.DefineVariable<double>(
-          "U/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
-      var_v_pdf = writer_io.DefineVariable<double>(
-          "V/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
-
-      if (shouldIWrite)
-      {
-        var_u_bins = writer_io.DefineVariable<double>("U/bins", {nbins},
-                                                      {0}, {nbins});
-        var_v_bins = writer_io.DefineVariable<double>("V/bins", {nbins},
-                                                      {0}, {nbins});
-        var_step_out = writer_io.DefineVariable<int>("step");
-      }
-
-      if (write_inputvars)
-      {
-        var_u_out = writer_io.DefineVariable<double>(
-            "U", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
-            {count1, shape[1], shape[2]});
-        var_v_out = writer_io.DefineVariable<double>(
-            "V", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
-            {count1, shape[1], shape[2]});
-          auto PDFU = writer_io.DefineDerivedVariable("derive/hashU",
-                                               "x = U \n"
-                                               "hash(x)",
-                                               adios2::DerivedVarType::StoreData);
-
-          auto PDFV = writer_io.DefineDerivedVariable("derive/hashV",
-                                               "x = V \n"
-                                               "hash(x)",
-                                               adios2::DerivedVarType::StoreData);
-      }
-
-
-
+              {start1, 0, 0}, {count1, shape[1], shape[2]}));
     // Read adios2 data
 
       std::cout << "Get U: " << rank << " size: " << u.size()
@@ -329,8 +326,7 @@ int main(int argc, char *argv[])
       std::cout << "rank: " << rank << "; count1: " << count1 << " ;start1:" << start1 << std::endl;
     reader.Get<double>(var_u_in, u);
     reader.Get<double>(var_v_in, v);
-      std::cout << "rank: " << rank << "; Size of u: " << u.size() << std::endl;
-      std::cout << "rank: " << rank << "; Size of v: " << v.size() << std::endl;
+
     if (shouldIWrite)
     {
       std::cout << "Get step: " << rank << std::endl;

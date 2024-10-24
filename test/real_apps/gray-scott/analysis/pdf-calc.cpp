@@ -78,10 +78,8 @@ int main(int argc, char *argv[])
     MPI_Finalize();
     return 0;
   }
-
   std::string in_filename;
   std::string out_filename;
-
   bool write_inputvars = false;
   in_filename = argv[1];
   out_filename = argv[2];
@@ -109,7 +107,6 @@ int main(int argc, char *argv[])
   std::vector<double> u;
   std::vector<double> v;
   int simStep = -5;
-
   // adios2 variable declarations
   adios2::Variable<double> var_u_in, var_v_in;
   adios2::Variable<int> var_step_in;
@@ -162,7 +159,6 @@ int main(int argc, char *argv[])
     // the variable dimensions do not change across timesteps
     if (firstStep) {
         shape = var_u_in.Shape();
-
         // Calculate global and local sizes of U and V
         u_global_size = shape[0] * shape[1] * shape[2];
         u_local_size = u_global_size / comm_size;
@@ -178,7 +174,6 @@ int main(int argc, char *argv[])
             count1 = shape[0] - count1 * (comm_size - 1);
         }
         if (shouldIWrite) {
-
         }
 
         if (write_inputvars) {

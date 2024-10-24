@@ -1,9 +1,6 @@
+
 /*
- * Analysis code for the Gray-Scott application.
- * Reads variable U and V, and computes the PDF for each 2D slices of U and V.
- * Writes the computed PDFs using ADIOS.
- *
- * Norbert Podhorszki, pnorbert@ornl.gov
+This is the hashing the bp5 file
  *
  */
 
@@ -254,5 +251,4 @@ int main(int argc, char *argv[])
     MPI_Barrier(comm);
     MPI_Finalize();
     return 0;
-}
 }

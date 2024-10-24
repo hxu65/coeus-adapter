@@ -39,75 +39,7 @@ bool epsilon(float d) { return (d < 1.0e-20); }
 /*
  * Function to compute the PDF of a 2D slice
  */
-template <class T>
-void compute_pdf(const std::vector<T> &data,
-                 const std::vector<std::size_t> &shape, const size_t start,
-                 const size_t count, const size_t nbins, const T min,
-                 const T max, std::vector<T> &pdf, std::vector<T> &bins)
-{
-  if (shape.size() != 3)
-    throw std::invalid_argument("ERROR: shape is expected to be 3D\n");
 
-  size_t slice_size = shape[1] * shape[2];
-  pdf.resize(count * nbins);
-  bins.resize(nbins);
-
-  size_t start_data = 0;
-  size_t start_pdf = 0;
-
-  T binWidth = (max - min) / nbins;
-  for (auto i = 0; i < nbins; ++i)
-  {
-    bins[i] = min + (i * binWidth);
-  }
-
-  if (nbins == 1)
-  {
-    // special case: only one bin
-    for (auto i = 0; i < count; ++i)
-    {
-      pdf[i] = slice_size;
-    }
-    return;
-  }
-
-  if (epsilon(max - min) || epsilon(binWidth))
-  {
-    // special case: constant array
-    for (auto i = 0; i < count; ++i)
-    {
-      pdf[i * nbins + (nbins / 2)] = slice_size;
-    }
-    return;
-  }
-
-  for (auto i = 0; i < count; ++i)
-  {
-    // Calculate a PDF for 'nbins' bins for values between 'min' and 'max'
-    // from data[ start_data .. start_data+slice_size-1 ]
-    // into pdf[ start_pdf .. start_pdf+nbins-1 ]
-    for (auto j = 0; j < slice_size; ++j)
-    {
-      if (data[start_data + j] > max || data[start_data + j] < min)
-      {
-        std::cout << " data[" << start * slice_size + start_data + j
-                  << "] = " << data[start_data + j]
-                  << " is out of [min,max] = [" << min << "," << max
-                  << "]" << std::endl;
-      }
-      size_t bin = static_cast<size_t>(
-          std::floor((data[start_data + j] - min) / binWidth));
-      if (bin == nbins)
-      {
-        bin = nbins - 1;
-      }
-      ++pdf[start_pdf + bin];
-    }
-    start_pdf += nbins;
-    start_data += slice_size;
-  }
-  return;
-}
 
 /*
  * Print info to the user on how to invoke the application
@@ -137,7 +69,6 @@ int main(int argc, char *argv[])
   const unsigned int color = 2;
   MPI_Comm comm;
   MPI_Comm_split(MPI_COMM_WORLD, color, wrank, &comm);
-
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &comm_size);
 
@@ -152,7 +83,7 @@ int main(int argc, char *argv[])
 
   std::string in_filename;
   std::string out_filename;
-  size_t nbins = 1000;
+
   bool write_inputvars = false;
   in_filename = argv[1];
   out_filename = argv[2];
@@ -171,34 +102,22 @@ int main(int argc, char *argv[])
     if (value == "yes")
       write_inputvars = true;
   }
-
   std::size_t u_global_size, v_global_size;
   std::size_t u_local_size, v_local_size;
-
   bool firstStep = true;
-
   std::vector<std::size_t> shape;
   size_t count1;
   size_t start1;
-
   std::vector<double> u;
   std::vector<double> v;
   int simStep = -5;
 
-  std::vector<double> pdf_u;
-  std::vector<double> pdf_v;
-  std::vector<double> bins_u;
-  std::vector<double> bins_v;
-
   // adios2 variable declarations
   adios2::Variable<double> var_u_in, var_v_in;
   adios2::Variable<int> var_step_in;
-  adios2::Variable<double> var_u_pdf, var_v_pdf;
-  adios2::Variable<double> var_u_bins, var_v_bins;
   adios2::Variable<int> var_step_out;
   adios2::Variable<double> var_u_out, var_v_out;
 
-  // adios2 io object and engine init
   adios2::ADIOS ad("adios2.xml", comm);
 
   // IO objects for reading and writing
@@ -224,12 +143,10 @@ int main(int argc, char *argv[])
   int stepAnalysis = 0;
   while (true)
   {
-    // Begin read step
     adios2::StepStatus read_status =
         reader.BeginStep(adios2::StepMode::Read, 10.0f);
     if (read_status == adios2::StepStatus::NotReady)
     {
-      // std::cout << "Stream not ready yet. Waiting...\n";
       std::this_thread::sleep_for(std::chrono::milliseconds(1000));
       continue;
     }
@@ -240,7 +157,6 @@ int main(int argc, char *argv[])
 
     // int stepSimOut = reader.CurrentStep();
     int stepSimOut = stepAnalysis;
-
     // Inquire variable
     var_u_in = reader_io.InquireVariable<double>("U");
     var_v_in = reader_io.InquireVariable<double>("V");
@@ -265,25 +181,6 @@ int main(int argc, char *argv[])
             // last process need to read all the rest of slices
             count1 = shape[0] - count1 * (comm_size - 1);
         }
-
-
-        /*std::cout << "  rank " << rank << " slice start={" <<  start1
-          << ",0,0} count={" << count1  << "," << shape[1] << "," <<
-          shape[2]
-          << "}" << std::endl;*/
-
-        // Set selection
-//        var_u_in.SetSelection(adios2::Box<adios2::Dims>(
-//                {start1, 0, 0}, {count1, shape[1], shape[2]}));
-//        var_v_in.SetSelection(adios2::Box<adios2::Dims>(
-//                {start1, 0, 0}, {count1, shape[1], shape[2]}));
-
-        // Declare variables to output
-       // var_u_pdf = writer_io.DefineVariable<double>(
-       //         "U/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
-       // var_v_pdf = writer_io.DefineVariable<double>(
-       //         "V/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
-
         if (shouldIWrite) {
 
         }
@@ -344,16 +241,9 @@ int main(int argc, char *argv[])
     }
 
 
-    std::vector<double> pdf_u;
-    std::vector<double> bins_u;
-
-    std::vector<double> pdf_v;
-    std::vector<double> bins_v;
-
     writer.BeginStep();
       writer.Put<double>(var_u_out, u.data());
       writer.Put<double>(var_v_out, v.data());
-
 
     writer.EndStep();
     ++stepAnalysis;

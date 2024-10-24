@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
         reader.Get<double>(var_v_in, v);
         auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
         auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_start_time - get_end_time);
-        std::cout << "rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
+        std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
 
         std::cout << "Get U: " << rank << " size: " << u.size()
                   << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
         writer.Put<double>(var_v_out, v.data());
         auto put_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
         auto put_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_start_time - put_end_time);
-        std::cout << "rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
+        std::cout << "@@@@@rank:" << rank << ", Put time: " <<  get_time_cost.count() << std::endl;
         writer.EndStep();
         ++stepAnalysis;
     }

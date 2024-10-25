@@ -225,12 +225,12 @@ int main(int argc, char *argv[])
             if (static_cast<int>(readHashV_1[i]) - static_cast<int>(readHashV_2[i]) > 0.01) {
                 auto app_end_time = std::chrono::system_clock::now();
                 std::time_t end_time_t = std::chrono::system_clock::to_time_t(app_end_time);
-                std::cout <<"The difference happened at: " << std::ctime(&end_time_t));
+                std::cout << "The difference happened at: " << std::ctime(&end_time_t) << std::endl;
             }
             if (static_cast<int>(readHashU_1[i]) - static_cast<int>(readHashU_2[i]) > 0.01) {
                 auto app_end_time = std::chrono::system_clock::now();
                 std::time_t end_time_t = std::chrono::system_clock::to_time_t(app_end_time);
-                td::cout <<"The difference happened at: " << std::ctime(&end_time_t));
+                std::cout <<"The difference happened at: " << std::ctime(&end_time_t) << std::endl;
             }
 
         }

@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
         writer.Put<double>(var_v_out, v.data());
 //        auto put_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
 //        auto put_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_end_time - put_start_time);
-        std::cout << "@@@@@rank:" << rank << ", Put time: " <<  put_time_cost.count() << std::endl;
+//        std::cout << "@@@@@rank:" << rank << ", Put time: " <<  put_time_cost.count() << std::endl;
         writer.EndStep();
 //        auto put_step_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
 //        auto put_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_step_end_time - put_step_start_time);

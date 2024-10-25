@@ -1,6 +1,9 @@
-
 /*
-This is the hashing the bp5 file
+ * Analysis code for the Gray-Scott application.
+ * Reads variable U and V, and computes the PDF for each 2D slices of U and V.
+ * Writes the computed PDFs using ADIOS.
+ *
+ * Norbert Podhorszki, pnorbert@ornl.gov
  *
  */
 
@@ -29,13 +32,6 @@ std::string concatenateVectorToString(const std::vector<size_t> &vec) {
     ss << " )";
     return ss.str();
 }
-
-bool epsilon(double d) { return (d < 1.0e-20); }
-bool epsilon(float d) { return (d < 1.0e-20); }
-
-/*
- * Function to compute the PDF of a 2D slice
- */
 
 
 /*
@@ -131,8 +127,10 @@ int main(int argc, char *argv[])
 
     // read data step-by-step
     int stepAnalysis = 0;
+    auto hashing_start_time = std::chrono::high_resolution_clock::now();
     while (true)
     {
+        auto get_start_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
         adios2::StepStatus read_status =
                 reader.BeginStep(adios2::StepMode::Read, 10.0f);
         if (read_status == adios2::StepStatus::NotReady)
@@ -196,13 +194,10 @@ int main(int argc, char *argv[])
                 {start1, 0, 0}, {count1, shape[1], shape[2]}));
         var_v_in.SetSelection(adios2::Box<adios2::Dims>(
                 {start1, 0, 0}, {count1, shape[1], shape[2]}));
+
         // Read adios2 data
-        auto get_start_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
         reader.Get<double>(var_u_in, u);
         reader.Get<double>(var_v_in, v);
-        auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_start_time - get_end_time);
-        std::cout << "rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
 
         std::cout << "Get U: " << rank << " size: " << u.size()
                   << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "
@@ -222,7 +217,9 @@ int main(int argc, char *argv[])
 
         // End read step (let resources about step go)
         reader.EndStep();
-
+        auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_end_time - get_start_time );
+        std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
         if (!rank)
         {
             std::cout << "PDF Analysis step " << stepAnalysis
@@ -231,15 +228,21 @@ int main(int argc, char *argv[])
         }
 
 
+        auto put_step_start_time = std::chrono::high_resolution_clock::now();
         writer.BeginStep();
         auto put_start_time = std::chrono::high_resolution_clock::now();
         writer.Put<double>(var_u_out, u.data());
         writer.Put<double>(var_v_out, v.data());
         auto put_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-        auto put_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_start_time - put_end_time);
-        std::cout << "rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
+        auto put_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_end_time - put_start_time);
+        std::cout << "@@@@@rank:" << rank << ", Put time: " <<  put_time_cost.count() << std::endl;
         writer.EndStep();
+        auto put_step_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+        auto put_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_step_end_time - put_step_start_time);
+        std::cout << "@@@@@rank:" << rank << ", Put Step time: " <<  put_step_time_cost.count() << std::endl;
         ++stepAnalysis;
+
+
     }
 
     // cleanup (close reader and writer)
@@ -247,6 +250,8 @@ int main(int argc, char *argv[])
     writer.Close();
     auto app_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
     auto app_duration = std::chrono::duration_cast<std::chrono::milliseconds>(app_end_time - app_start_time);
+    auto hashing_duration = std::chrono::duration_cast<std::chrono::milliseconds>(app_end_time - hashing_start_time);
+    std::cout << "rank:" << rank << ", Hashing time: " <<  hashing_duration.count() << std::endl;
     std::cout << "rank:" << rank << ", time: " <<  app_duration.count() << std::endl;
     MPI_Barrier(comm);
     MPI_Finalize();

@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
         std::cout << "@@@@@rank:" << rank << ", Put time: " <<  put_time_cost.count() << std::endl;
         writer.EndStep();
         auto put_step_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-        auto put_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_step_end_time - put_step_start_time)
+        auto put_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_step_end_time - put_step_start_time);
         std::cout << "@@@@@rank:" << rank << ", Put Step time: " <<  put_step_time_cost.count() << std::endl;
         ++stepAnalysis;
 

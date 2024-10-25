@@ -184,8 +184,7 @@ int main(int argc, char *argv[])
 
         // Set the selection at the first step only, assuming that
         // the variable dimensions do not change across timesteps
-        if (firstStep)
-        {
+        if (firstStep) {
             shape = var_u_in.Shape();
             // Calculate global and local sizes of U and V
             u_global_size = shape[0] * shape[1] * shape[2];
@@ -195,17 +194,14 @@ int main(int argc, char *argv[])
             // 1D decomposition
             count1 = shape[0] / comm_size;
             start1 = count1 * rank;
-            if (rank == comm_size - 1)
-            {
+            if (rank == comm_size - 1) {
                 // last process need to read all the rest of slices
                 count1 = shape[0] - count1 * (comm_size - 1);
             }
-            if (write_inputvars)
-            {
+            if (write_inputvars) {
             }
             firstStep = false;
         }
-        // Read adios2 data
 
 //        var_u_in.SetSelection(adios2::Box<adios2::Dims>(
 //                {start1, 0, 0}, {count1, shape[1], shape[2]}));
@@ -220,9 +216,9 @@ int main(int argc, char *argv[])
         reader.Get(varhash_V_1, readHashV_1);
         reader_2.Get(varhash_U_2, readHashV_2);
         reader_2.Get(varhash_V_2, readHashU_2);
-
+        // compare the hash value
         for(int i =0; i < readHashV_1.size(); i++){
-            std::cout << static_cast<int>(readHashV_1[i]) << "value: " << static_cast<int>(readHashV_2[i]) << std::endl;
+            std::cout << static_cast<int>(readHashV_1[i]) << " value: " << static_cast<int>(readHashV_2[i]) << std::endl;
             if (static_cast<int>(readHashV_1[i]) - static_cast<int>(readHashV_2[i]) > 0.01) {
                 auto app_end_time = std::chrono::system_clock::now();
                 std::time_t end_time_t = std::chrono::system_clock::to_time_t(app_end_time);

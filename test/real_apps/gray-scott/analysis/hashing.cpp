@@ -33,10 +33,6 @@ std::string concatenateVectorToString(const std::vector<size_t> &vec) {
     return ss.str();
 }
 
-
-/*
- * Print info to the user on how to invoke the application
- */
 void printUsage()
 {
     std::cout
@@ -62,7 +58,6 @@ int main(int argc, char *argv[])
     MPI_Comm_split(MPI_COMM_WORLD, color, wrank, &comm);
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &comm_size);
-
     if (argc < 3)
     {
         std::cout << "Not enough arguments\n";
@@ -80,7 +75,6 @@ int main(int argc, char *argv[])
     if (argc >= 4)
     {
         int value = std::stoi(argv[3]);
-
     }
 
     if (argc >= 5)
@@ -105,7 +99,6 @@ int main(int argc, char *argv[])
     adios2::Variable<int> var_step_in;
     adios2::Variable<int> var_step_out;
     adios2::Variable<double> var_u_out, var_v_out;
-
     adios2::ADIOS ad("adios2.xml", comm);
 
     // IO objects for reading and writing
@@ -143,7 +136,6 @@ int main(int argc, char *argv[])
             break;
         }
 
-        // int stepSimOut = reader.CurrentStep();
         int stepSimOut = stepAnalysis;
         // Inquire variable
         var_u_in = reader_io.InquireVariable<double>("U");
@@ -199,27 +191,17 @@ int main(int argc, char *argv[])
         reader.Get<double>(var_u_in, u);
         reader.Get<double>(var_v_in, v);
 
-        std::cout << "Get U: " << rank << " size: " << u.size()
-                  << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "
-                  << " Start: (" << concatenateVectorToString(var_u_in.Start()) << ") "
-                  << " Shape: (" << concatenateVectorToString(var_u_in.Shape()) << ") "
-                  << std::endl;
-        std::cout << "Get V: " << rank << " size: " << v.size()
-                  << " Count: (" << concatenateVectorToString(var_v_in.Count()) << ") "
-                  << " Start: (" << concatenateVectorToString(var_v_in.Start()) << ") "
-                  << " Shape: (" << concatenateVectorToString(var_v_in.Shape()) << ") "
-                  << std::endl;
+
         if (shouldIWrite)
         {
-            std::cout << "Get step: " << rank << std::endl;
             reader.Get<int>(var_step_in, &simStep);
         }
 
         // End read step (let resources about step go)
         reader.EndStep();
-        auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_end_time - get_start_time );
-        std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
+//        auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+//        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_end_time - get_start_time );
+//        std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
         if (!rank)
         {
             std::cout << "PDF Analysis step " << stepAnalysis
@@ -227,21 +209,19 @@ int main(int argc, char *argv[])
                       << " sim compute step " << simStep << std::endl;
         }
 
-
-        auto put_step_start_time = std::chrono::high_resolution_clock::now();
+//        auto put_step_start_time = std::chrono::high_resolution_clock::now();
         writer.BeginStep();
-        auto put_start_time = std::chrono::high_resolution_clock::now();
+//        auto put_start_time = std::chrono::high_resolution_clock::now();
         writer.Put<double>(var_u_out, u.data());
         writer.Put<double>(var_v_out, v.data());
-        auto put_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-        auto put_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_end_time - put_start_time);
+//        auto put_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+//        auto put_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_end_time - put_start_time);
         std::cout << "@@@@@rank:" << rank << ", Put time: " <<  put_time_cost.count() << std::endl;
         writer.EndStep();
-        auto put_step_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-        auto put_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_step_end_time - put_step_start_time);
-        std::cout << "@@@@@rank:" << rank << ", Put Step time: " <<  put_step_time_cost.count() << std::endl;
+//        auto put_step_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+//        auto put_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_step_end_time - put_step_start_time);
+//        std::cout << "@@@@@rank:" << rank << ", Put Step time: " <<  put_step_time_cost.count() << std::endl;
         ++stepAnalysis;
-
 
     }
 

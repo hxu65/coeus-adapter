@@ -221,16 +221,16 @@ int main(int argc, char *argv[])
         reader_2.Get(varhash_U_2, readHashV_2);
         reader_2.Get(varhash_V_2, readHashU_2);
 
-        for(int i =0; i < readHash_1.size(); i++){
+        for(int i =0; i < readHashV_1.size(); i++){
             if (static_cast<int>(readHashV_1[i]) - static_cast<int>(readHashV_2[i]) > 0.01) {
                 auto app_end_time = std::chrono::system_clock::now();
                 std::time_t end_time_t = std::chrono::system_clock::to_time_t(app_end_time);
-                engine_logger->info("The difference happened at {}", std::ctime(&end_time_t));
+                std::cout <<"The difference happened at: " << std::ctime(&end_time_t));
             }
             if (static_cast<int>(readHashU_1[i]) - static_cast<int>(readHashU_2[i]) > 0.01) {
                 auto app_end_time = std::chrono::system_clock::now();
                 std::time_t end_time_t = std::chrono::system_clock::to_time_t(app_end_time);
-                engine_logger->info("The difference happened at {}", std::ctime(&end_time_t));
+                td::cout <<"The difference happened at: " << std::ctime(&end_time_t));
             }
 
         }

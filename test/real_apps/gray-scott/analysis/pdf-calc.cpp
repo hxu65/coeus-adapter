@@ -128,15 +128,7 @@ int main(int argc, char *argv[])
     // read data step-by-step
     int stepAnalysis = 0;
     auto hashing_start_time = std::chrono::high_resolution_clock::now();
-    auto PDFU = writer_io.DefineDerivedVariable("derive/hashU",
-                                                "x = U \n"
-                                                "hash(x)",
-                                                adios2::DerivedVarType::StoreData);
 
-    auto PDFV = writer_io.DefineDerivedVariable("derive/hashV",
-                                                "x = V \n"
-                                                "hash(x)",
-                                                adios2::DerivedVarType::StoreData);
     while (true)
     {
         auto get_start_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
@@ -187,7 +179,15 @@ int main(int argc, char *argv[])
                 var_v_out = writer_io.DefineVariable<double>(
                         "V", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
                         {count1, shape[1], shape[2]});
+                auto PDFU = writer_io.DefineDerivedVariable("derive/hashU",
+                                                            "x = U \n"
+                                                            "hash(x)",
+                                                            adios2::DerivedVarType::StoreData);
 
+                auto PDFV = writer_io.DefineDerivedVariable("derive/hashV",
+                                                            "x = V \n"
+                                                            "hash(x)",
+                                                            adios2::DerivedVarType::StoreData);
             }
             firstStep = false;
         }

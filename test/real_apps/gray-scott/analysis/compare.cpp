@@ -36,13 +36,6 @@ std::string concatenateVectorToString(const std::vector<size_t> &vec) {
     return ss.str();
 }
 
-bool epsilon(double d) { return (d < 1.0e-20); }
-bool epsilon(float d) { return (d < 1.0e-20); }
-
-/*
- * Function to compute the PDF of a 2D slice
- */
-
 
 /*
  * Print info to the user on how to invoke the application
@@ -111,45 +104,35 @@ int main(int argc, char *argv[])
     std::vector<std::size_t> shape;
     size_t count1;
     size_t start1;
-    std::vector<double> u;
-    std::vector<double> v;
-    std::vector<double> u_2;
-    std::vector<double> v_2;
     int simStep = -5;
-
 
     // adios2 variable declarations
     adios2::Variable<double> var_u_in, var_v_in;
     adios2::Variable<int> var_step_in;
     adios2::Variable<int> var_step_out;
-    adios2::Variable<double> var_u_out, var_v_out;
-
     // another variable from copy
-    adios2::Variable<double> var_u_in_2, var_v_in_2;
     adios2::Variable<int> var_step_in_2;
     adios2::Variable<int> var_step_out_2;
-    adios2::Variable<double> var_u_out_2, var_v_out_2;
-
 
     // adios2 io object and engine init
     adios2::ADIOS ad("adios2.xml", comm);
 
     // IO objects for reading and writing
     adios2::IO reader_io = ad.DeclareIO("SimulationOutput");
-    adios2::IO writer_io = ad.DeclareIO("PDFAnalysisOutput");
+    adios2::IO reader2_io = ad.DeclareIO("PDFAnalysisOutput");
     if (!rank)
     {
         std::cout << "PDF analysis reads from Simulation using engine type:  "
                   << reader_io.EngineType() << std::endl;
         std::cout << "PDF analysis writes using engine type:                 "
-                  << writer_io.EngineType() << std::endl;
+                  << reader2_io.EngineType() << std::endl;
     }
 
     // Engines for reading and writing
     adios2::Engine reader =
             reader_io.Open(in_filename, adios2::Mode::Read, comm);
-    adios2::Engine writer =
-            writer_io.Open(out_filename, adios2::Mode::Read, comm);
+    adios2::Engine reader_2 =
+            reader2_io.Open(out_filename, adios2::Mode::Read, comm);
 
     bool shouldIWrite = (!rank || reader_io.EngineType() == "HDF5");
 
@@ -175,7 +158,7 @@ int main(int argc, char *argv[])
         int stepSimOut = stepAnalysis;
 
         adios2::StepStatus read_status_2 =
-                writer.BeginStep(adios2::StepMode::Read, 10.0f);
+                reader_2.BeginStep(adios2::StepMode::Read, 10.0f);
         if (read_status_2 == adios2::StepStatus::NotReady)
         {
             // std::cout << "Stream not ready yet. Waiting...\n";
@@ -190,35 +173,25 @@ int main(int argc, char *argv[])
         // int stepSimOut = reader.CurrentStep();
         int stepSimOut_2 = stepAnalysis;
 
-
-
-
         // Inquire variable
         var_u_in = reader_io.InquireVariable<double>("U");
         auto varhash_U_1 = reader_io.InquireVariable<uint8_t>("derive/hashU");
-        var_v_in = reader_io.InquireVariable<double>("V");
         auto varhash_V_1 = reader_io.InquireVariable<uint8_t>("derive/hashV");
         var_step_in = reader_io.InquireVariable<int>("step");
-
-        var_u_in_2 = writer_io.InquireVariable<double>("U");
-        auto varhash_U_2 = writer_io.InquireVariable<uint8_t>("derive/hashU");
-        var_v_in_2 = writer_io.InquireVariable<double>("V");
-        auto varhash_V_2 = writer_io.InquireVariable<uint8_t>("derive/hashV");
-        var_step_in_2 = writer_io.InquireVariable<int>("step");
-
+        auto varhash_U_2 = reader2_io.InquireVariable<uint8_t>("derive/hashU");
+        auto varhash_V_2 = reader2_io.InquireVariable<uint8_t>("derive/hashV");
+        var_step_in_2 = reader2_io.InquireVariable<int>("step");
 
         // Set the selection at the first step only, assuming that
         // the variable dimensions do not change across timesteps
         if (firstStep)
         {
             shape = var_u_in.Shape();
-
             // Calculate global and local sizes of U and V
             u_global_size = shape[0] * shape[1] * shape[2];
             u_local_size = u_global_size / comm_size;
             v_global_size = shape[0] * shape[1] * shape[2];
             v_local_size = v_global_size / comm_size;
-
             // 1D decomposition
             count1 = shape[0] / comm_size;
             start1 = count1 * rank;
@@ -227,146 +200,50 @@ int main(int argc, char *argv[])
                 // last process need to read all the rest of slices
                 count1 = shape[0] - count1 * (comm_size - 1);
             }
-
-            /*std::cout << "  rank " << rank << " slice start={" <<  start1
-              << ",0,0} count={" << count1  << "," << shape[1] << "," <<
-              shape[2]
-              << "}" << std::endl;*/
-
-            // Set selection
-            var_u_in.SetSelection(adios2::Box<adios2::Dims>(
-                    {start1, 0, 0}, {count1, shape[1], shape[2]}));
-            var_v_in.SetSelection(adios2::Box<adios2::Dims>(
-                    {start1, 0, 0}, {count1, shape[1], shape[2]}));
-
-
-            var_u_in_2.SetSelection(adios2::Box<adios2::Dims>(
-                    {start1, 0, 0}, {count1, shape[1], shape[2]}));
-            var_v_in_2.SetSelection(adios2::Box<adios2::Dims>(
-                    {start1, 0, 0}, {count1, shape[1], shape[2]}));
-
-            // Declare variables to output
-            var_u_pdf = writer_io.DefineVariable<double>(
-                    "U/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
-            var_v_pdf = writer_io.DefineVariable<double>(
-                    "V/pdf", {shape[0], nbins}, {start1, 0}, {count1, nbins});
-
-
-
             if (write_inputvars)
             {
-                var_u_out = writer_io.DefineVariable<double>(
-                        "U", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
-                        {count1, shape[1], shape[2]});
-                var_v_out = writer_io.DefineVariable<double>(
-                        "V", {shape[0], shape[1], shape[2]}, {start1, 0, 0},
-                        {count1, shape[1], shape[2]});
-                auto PDFU = writer_io.DefineDerivedVariable("derive/hashU",
-                                                            "x = U \n"
-                                                            "hash(x)",
-                                                            adios2::DerivedVarType::StoreData);
-
-                auto PDFV = writer_io.DefineDerivedVariable("derive/hashV",
-                                                            "x = V \n"
-                                                            "hash(x)",
-                                                            adios2::DerivedVarType::StoreData);
             }
             firstStep = false;
         }
-
         // Read adios2 data
-        if(rank == 0){
-            std::cout << "Get U: " << rank << " size: " << u.size()
-                      << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "
-                      << " Start: (" << concatenateVectorToString(var_u_in.Start()) << ") "
-                      << " Shape: (" << concatenateVectorToString(var_u_in.Shape()) << ") "
-                      << std::endl;
-            std::cout << "Get V: " << rank << " size: " << v.size()
-                      << " Count: (" << concatenateVectorToString(var_v_in.Count()) << ") "
-                      << " Start: (" << concatenateVectorToString(var_v_in.Start()) << ") "
-                      << " Shape: (" << concatenateVectorToString(var_v_in.Shape()) << ") "
-                      << std::endl;
-        }
+
+//        var_u_in.SetSelection(adios2::Box<adios2::Dims>(
+//                {start1, 0, 0}, {count1, shape[1], shape[2]}));
+//        var_v_in.SetSelection(adios2::Box<adios2::Dims>(
+//                {start1, 0, 0}, {count1, shape[1], shape[2]}));
         std::vector<uint8_t> readHashV_1;
         std::vector<uint8_t> readHashU_1;
-
         std::vector<uint8_t> readHashV_2;
         std::vector<uint8_t> readHashU_2;
-        reader.Get<double>(var_u_in, u);
+
         reader.Get(varhash_U_1, readHashU_1);
-        reader.Get<double>(var_v_in, v);
         reader.Get(varhash_V_1, readHashV_1);
-
-
-        writer.Get<double>(var_u_in_2, u_2);
-        writer.Get(varhash_U_2, readHashV_2);
-        writer.Get<double>(var_v_in_2, v_2);
-        writer.Get(varhash_V_2, readHashU_2);
-
+        reader_2.Get(varhash_U_2, readHashV_2);
+        reader_2.Get(varhash_V_2, readHashU_2);
 
         for(int i =0; i < readHash_1.size(); i++){
-            if (static_cast<int>(readHash_1[i]) - static_cast<int>(readHash_2[i]) > 0.01) {
-
+            if (static_cast<int>(readHashV_1[i]) - static_cast<int>(readHashV_2[i]) > 0.01) {
                 auto app_end_time = std::chrono::system_clock::now();
                 std::time_t end_time_t = std::chrono::system_clock::to_time_t(app_end_time);
                 engine_logger->info("The difference happened at {}", std::ctime(&end_time_t));
             }
-        }
+            if (static_cast<int>(readHashU_1[i]) - static_cast<int>(readHashU_2[i]) > 0.01) {
+                auto app_end_time = std::chrono::system_clock::now();
+                std::time_t end_time_t = std::chrono::system_clock::to_time_t(app_end_time);
+                engine_logger->info("The difference happened at {}", std::ctime(&end_time_t));
+            }
 
-
-        if (shouldIWrite)
-        {
-            std::cout << "Get step: " << rank << std::endl;
-            reader.Get<int>(var_step_in, &simStep);
         }
 
         // End read step (let resources about step go)
         reader.EndStep();
-
-        if (!rank)
-        {
-            std::cout << "PDF Analysis step " << stepAnalysis
-                      << " processing sim output step " << stepSimOut
-                      << " sim compute step " << simStep << std::endl;
-        }
-
-        // Calculate min/max of arrays
-        std::pair<double, double> minmax_u;
-        std::pair<double, double> minmax_v;
-        auto mmu = std::minmax_element(u.begin(), u.end());
-        // minmax_u = std::make_pair(*mmu.first, *mmu.second);
-        auto mmv = std::minmax_element(v.begin(), v.end());
-        //  minmax_v = std::make_pair(*mmv.first, *mmv.second);
-
-//    // Compute PDF
-        std::vector<double> pdf_u;
-        std::vector<double> bins_u;
-        // compute_pdf(u, shape, start1, count1, nbins, minmax_u.first,
-        //            minmax_u.second, pdf_u, bins_u);
-//
-        std::vector<double> pdf_v;
-        std::vector<double> bins_v;
-        // compute_pdf(v, shape, start1, count1, nbins, minmax_v.first,
-        //             minmax_v.second, pdf_v, bins_v);
-
-//     write U, V, and their norms out
-       // writer.BeginStep();
-     //   writer.Put<double>(var_u_out, u.data());
-      //  writer.Put<double>(var_v_out, v.data());
-       // if (shouldIWrite)
-     //   {
-            //  writer.Put<double>(var_u_bins, bins_u.data());
-            //  writer.Put<double>(var_v_bins, bins_v.data());
-            //  writer.Put<int>(var_step_out, simStep);
-     //   }
-
-        writer.EndStep();
+        reader_2.EndStep();
         ++stepAnalysis;
     }
 
-    // cleanup (close reader and writer)
+
     reader.Close();
-    writer.Close();
+    reader_2.Close();
     auto app_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
     auto app_duration = std::chrono::duration_cast<std::chrono::milliseconds>(app_end_time - app_start_time);
     std::cout << "rank:" << rank << ", time: " <<  app_duration.count() << std::endl;

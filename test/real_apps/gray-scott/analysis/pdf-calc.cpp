@@ -33,13 +33,6 @@ std::string concatenateVectorToString(const std::vector<size_t> &vec) {
     return ss.str();
 }
 
-bool epsilon(double d) { return (d < 1.0e-20); }
-bool epsilon(float d) { return (d < 1.0e-20); }
-
-/*
- * Function to compute the PDF of a 2D slice
- */
-
 
 /*
  * Print info to the user on how to invoke the application
@@ -201,14 +194,10 @@ int main(int argc, char *argv[])
                 {start1, 0, 0}, {count1, shape[1], shape[2]}));
         var_v_in.SetSelection(adios2::Box<adios2::Dims>(
                 {start1, 0, 0}, {count1, shape[1], shape[2]}));
+
         // Read adios2 data
-
-
         reader.Get<double>(var_u_in, u);
         reader.Get<double>(var_v_in, v);
-
-
-
 
         std::cout << "Get U: " << rank << " size: " << u.size()
                   << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "

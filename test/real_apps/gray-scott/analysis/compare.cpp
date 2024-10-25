@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
     std::string in_filename;
     std::string out_filename;
-    size_t nbins = 1000;
+
     bool write_inputvars = false;
     in_filename = argv[1];
     out_filename = argv[2];
@@ -95,8 +95,7 @@ int main(int argc, char *argv[])
     if (argc >= 4)
     {
         int value = std::stoi(argv[3]);
-        if (value > 0)
-            nbins = static_cast<size_t>(value);
+
     }
 
     if (argc >= 5)
@@ -106,40 +105,28 @@ int main(int argc, char *argv[])
         if (value == "yes")
             write_inputvars = true;
     }
-
     std::size_t u_global_size, v_global_size;
     std::size_t u_local_size, v_local_size;
-
     bool firstStep = true;
-
     std::vector<std::size_t> shape;
     size_t count1;
     size_t start1;
-
     std::vector<double> u;
     std::vector<double> v;
     std::vector<double> u_2;
     std::vector<double> v_2;
     int simStep = -5;
 
-    std::vector<double> pdf_u;
-    std::vector<double> pdf_v;
-    std::vector<double> bins_u;
-    std::vector<double> bins_v;
 
     // adios2 variable declarations
     adios2::Variable<double> var_u_in, var_v_in;
     adios2::Variable<int> var_step_in;
-    adios2::Variable<double> var_u_pdf, var_v_pdf;
-    adios2::Variable<double> var_u_bins, var_v_bins;
     adios2::Variable<int> var_step_out;
     adios2::Variable<double> var_u_out, var_v_out;
 
     // another variable from copy
     adios2::Variable<double> var_u_in_2, var_v_in_2;
     adios2::Variable<int> var_step_in_2;
-    adios2::Variable<double> var_u_pdf, var_v_pdf;
-    adios2::Variable<double> var_u_bins, var_v_bins;
     adios2::Variable<int> var_step_out_2;
     adios2::Variable<double> var_u_out_2, var_v_out_2;
 
@@ -175,7 +162,7 @@ int main(int argc, char *argv[])
                 reader.BeginStep(adios2::StepMode::Read, 10.0f);
         if (read_status == adios2::StepStatus::NotReady)
         {
-            // std::cout << "Stream not ready yet. Waiting...\n";
+
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             continue;
         }
@@ -202,7 +189,6 @@ int main(int argc, char *argv[])
 
         // int stepSimOut = reader.CurrentStep();
         int stepSimOut_2 = stepAnalysis;
-
 
 
 

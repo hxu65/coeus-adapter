@@ -141,11 +141,7 @@ int main(int argc, char *argv[])
 
     // read data step-by-step
     int stepAnalysis = 0;
-    var_u_in = reader_io.InquireVariable<double>("U");
 
-    var_step_in = reader_io.InquireVariable<int>("step");
-
-    var_step_in_2 = reader2_io.InquireVariable<int>("step");
     while (true)
     {
         // Begin read step
@@ -180,7 +176,11 @@ int main(int argc, char *argv[])
 
         // int stepSimOut = reader.CurrentStep();
         int stepSimOut_2 = stepAnalysis;
+        var_u_in = reader_io.InquireVariable<double>("U");
 
+        var_step_in = reader_io.InquireVariable<int>("step");
+
+        var_step_in_2 = reader2_io.InquireVariable<int>("step");
         // Set the selection at the first step only, assuming that
         // the variable dimensions do not change across timesteps
         if (firstStep) {

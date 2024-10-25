@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
     auto hashing_start_time = std::chrono::high_resolution_clock::now();
     while (true)
     {
+        auto get_start_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
         adios2::StepStatus read_status =
                 reader.BeginStep(adios2::StepMode::Read, 10.0f);
         if (read_status == adios2::StepStatus::NotReady)
@@ -201,11 +202,12 @@ int main(int argc, char *argv[])
         var_v_in.SetSelection(adios2::Box<adios2::Dims>(
                 {start1, 0, 0}, {count1, shape[1], shape[2]}));
         // Read adios2 data
-        auto get_start_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+
+
         reader.Get<double>(var_u_in, u);
         reader.Get<double>(var_v_in, v);
-        auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_end_time - get_start_time );
+
+
         std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
 
         std::cout << "Get U: " << rank << " size: " << u.size()
@@ -226,7 +228,8 @@ int main(int argc, char *argv[])
 
         // End read step (let resources about step go)
         reader.EndStep();
-
+        auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_end_time - get_start_time );
         if (!rank)
         {
             std::cout << "PDF Analysis step " << stepAnalysis

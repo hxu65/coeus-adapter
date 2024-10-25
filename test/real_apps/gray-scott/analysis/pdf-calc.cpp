@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
         reader.Get<double>(var_v_in, v);
 
 
-        std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
+
 
         std::cout << "Get U: " << rank << " size: " << u.size()
                   << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "
@@ -230,6 +230,7 @@ int main(int argc, char *argv[])
         reader.EndStep();
         auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
         auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_end_time - get_start_time );
+        std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
         if (!rank)
         {
             std::cout << "PDF Analysis step " << stepAnalysis

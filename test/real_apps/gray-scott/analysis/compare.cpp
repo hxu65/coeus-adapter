@@ -113,7 +113,10 @@ int main(int argc, char *argv[])
     // another variable from copy
     adios2::Variable<int> var_step_in_2;
     adios2::Variable<int> var_step_out_2;
-
+    std::vector<uint8_t> readHashV_1;
+    std::vector<uint8_t> readHashU_1;
+    std::vector<uint8_t> readHashV_2;
+    std::vector<uint8_t> readHashU_2;
     // adios2 io object and engine init
     adios2::ADIOS ad("adios2.xml", comm);
 
@@ -138,6 +141,11 @@ int main(int argc, char *argv[])
 
     // read data step-by-step
     int stepAnalysis = 0;
+    var_u_in = reader_io.InquireVariable<double>("U");
+
+    var_step_in = reader_io.InquireVariable<int>("step");
+
+    var_step_in_2 = reader2_io.InquireVariable<int>("step");
     while (true)
     {
         // Begin read step
@@ -173,15 +181,6 @@ int main(int argc, char *argv[])
         // int stepSimOut = reader.CurrentStep();
         int stepSimOut_2 = stepAnalysis;
 
-        // Inquire variable
-        var_u_in = reader_io.InquireVariable<double>("U");
-        auto varhash_U_1 = reader_io.InquireVariable<uint8_t>("derive/hashU");
-        auto varhash_V_1 = reader_io.InquireVariable<uint8_t>("derive/hashV");
-        var_step_in = reader_io.InquireVariable<int>("step");
-        auto varhash_U_2 = reader2_io.InquireVariable<uint8_t>("derive/hashU");
-        auto varhash_V_2 = reader2_io.InquireVariable<uint8_t>("derive/hashV");
-        var_step_in_2 = reader2_io.InquireVariable<int>("step");
-
         // Set the selection at the first step only, assuming that
         // the variable dimensions do not change across timesteps
         if (firstStep) {
@@ -207,11 +206,11 @@ int main(int argc, char *argv[])
 //                {start1, 0, 0}, {count1, shape[1], shape[2]}));
 //        var_v_in.SetSelection(adios2::Box<adios2::Dims>(
 //                {start1, 0, 0}, {count1, shape[1], shape[2]}));
-        std::vector<uint8_t> readHashV_1;
-        std::vector<uint8_t> readHashU_1;
-        std::vector<uint8_t> readHashV_2;
-        std::vector<uint8_t> readHashU_2;
 
+        auto varhash_U_1 = reader_io.InquireVariable<uint8_t>("derive/hashU");
+        auto varhash_V_1 = reader_io.InquireVariable<uint8_t>("derive/hashV");
+        auto varhash_U_2 = reader2_io.InquireVariable<uint8_t>("derive/hashU");
+        auto varhash_V_2 = reader2_io.InquireVariable<uint8_t>("derive/hashV");
         reader.Get(varhash_U_1, readHashU_1);
         reader.Get(varhash_V_1, readHashV_1);
         reader_2.Get(varhash_U_2, readHashV_2);

@@ -164,7 +164,6 @@ int main(int argc, char *argv[])
             // 1D decomposition
             count1 = shape[0] / comm_size;
             start1 = count1 * rank;
-            std::cout << "rank: " << rank << "; count1: " << count1 << " ;start1:" << start1 << std::endl;
             if (rank == comm_size - 1) {
                 // last process need to read all the rest of slices
                 count1 = shape[0] - count1 * (comm_size - 1);
@@ -220,7 +219,8 @@ int main(int argc, char *argv[])
         reader.EndStep();
         auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
         auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_end_time - get_start_time );
-        std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
+        int clock1 = get_time_cost.count() + 1000;
+        std::cout << "@@@@rank:" << rank << ", get time: " <<  clock1 << std::endl;
         if (!rank)
         {
             std::cout << "PDF Analysis step " << stepAnalysis

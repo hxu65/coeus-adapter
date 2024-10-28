@@ -282,13 +282,13 @@ int main(int argc, char *argv[])
     auto total_step_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
     auto total_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(total_step_end_time - total_step_start_time);
     step_total_time = total_step_time_cost.count();
-    std::cout << "rank:" << rank << "reader_beginstep_time: " << reader_beginstep_time < <std::endl;
-    std::cout << "rank:" << rank << "reader_get_time: " << reader_get_time < <std::endl;
-    std::cout << "rank:" << rank << "reader_endstep_time: " << reader_endstep_time < <std::endl;
-    std::cout << "rank:" << rank << "writer_beginstep_time: " << writer_beginstep_time < <std::endl;
-    std::cout << "rank:" << rank << "writer_put_time : " << writer_put_time  < <std::endl;
-    std::cout << "rank:" << rank << "writer_endstep_time : " << writer_endstep_time  < <std::endl;
-    std::cout << "rank:" << rank << "step_total_time : " << step_total_time  < <std::endl;
+    std::cout << "rank:" << rank << "reader_beginstep_time: " << reader_beginstep_time << std::endl;
+    std::cout << "rank:" << rank << "reader_get_time: " << reader_get_time << std::endl;
+    std::cout << "rank:" << rank << "reader_endstep_time: " << reader_endstep_time << std::endl;
+    std::cout << "rank:" << rank << "writer_beginstep_time: " << writer_beginstep_time << std::endl;
+    std::cout << "rank:" << rank << "writer_put_time : " << writer_put_time  << std::endl;
+    std::cout << "rank:" << rank << "writer_endstep_time : " << writer_endstep_time  << std::endl;
+    std::cout << "rank:" << rank << "step_total_time : " << step_total_time  << std::endl;
     // cleanup (close reader and writer)
     reader.Close();
     writer.Close();

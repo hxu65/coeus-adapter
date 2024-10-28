@@ -294,9 +294,8 @@ int main(int argc, char *argv[])
     writer.Close();
     auto app_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
     auto app_duration = std::chrono::duration_cast<std::chrono::milliseconds>(app_end_time - app_start_time);
-    auto hashing_duration = std::chrono::duration_cast<std::chrono::milliseconds>(app_end_time - hashing_start_time);
-    std::cout << "rank:" << rank << ", Hashing time: " <<  hashing_duration.count() << std::endl;
-    std::cout << "rank:" << rank << ", time: " <<  app_duration.count() << std::endl;
+
+    std::cout << "rank:" << rank << ", app duration time: " <<  app_duration.count() << std::endl;
     MPI_Barrier(comm);
     MPI_Finalize();
     return 0;

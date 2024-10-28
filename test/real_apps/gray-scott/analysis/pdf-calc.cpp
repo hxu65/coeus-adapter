@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     int stepAnalysis = 0;
 
 
-    total_step_start_time = std::chrono::high_resolution_clock::now();
+    auto total_step_start_time = std::chrono::high_resolution_clock::now();
     while (true)
     {
 
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
         reader.Get<double>(var_u_in, u);
         reader.Get<double>(var_v_in, v);
         auto reader_get_end_time = std::chrono::high_resolution_clock::now();
-        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(reader_get_end_time - reader_get_start_time );
+         get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(reader_get_end_time - reader_get_start_time );
         reader_get_time = get_time_cost.count() + reader_get_time;
         std::cout << "Get U: " << rank << " size: " << u.size()
                   << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
         // End read step (let resources about step go)
         reader.EndStep();
         auto reader_endstep_end_time = std::chrono::high_resolution_clock::now();
-        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(reader_endstep_end_time - reader_endstep_start_time  );
+         get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(reader_endstep_end_time - reader_endstep_start_time  );
         reader_endstep_time  = get_time_cost.count() + reader_endstep_time;
 
 
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
         auto writer_beginstep_start_time = std::chrono::high_resolution_clock::now();
         writer.BeginStep();
         auto writer_beginstep_end_time = std::chrono::high_resolution_clock::now();
-        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_beginstep_end_time  - writer_beginstep_start_time );
+         get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_beginstep_end_time  - writer_beginstep_start_time );
         writer_beginstep_time  = get_time_cost.count() + writer_beginstep_time;
 
         auto writer_put_start_time = std::chrono::high_resolution_clock::now();
@@ -265,14 +265,14 @@ int main(int argc, char *argv[])
         writer.Put<double>(var_v_out, v.data());
 
         auto writer_put_end_time = std::chrono::high_resolution_clock::now();
-        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_put_end_time  - writer_put_start_time );
+        get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_put_end_time  - writer_put_start_time );
         writer_put_time  = get_time_cost.count() + writer_put_time;
 
 
         auto writer_endstep_start_time = std::chrono::high_resolution_clock::now();
         writer.EndStep();
         auto writer_endstep_end_time = std::chrono::high_resolution_clock::now();
-        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_endstep_end_time  - writer_endstep_start_time );
+         get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_endstep_end_time  - writer_endstep_start_time );
         writer_endstep_time  = get_time_cost.count() + writer_endstep_time;
 
         ++stepAnalysis;

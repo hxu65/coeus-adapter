@@ -131,7 +131,7 @@ class AdiosHashing(Application):
 
         cwd = os.path.dirname(self.adios2_xml_path)
         # print(self.env['HERMES_CLIENT_CONF'])
-        Exec(f'adios2-pdf-calc {in_file} {out_file} {nbins} {write_inputbars}',
+        Exec(f'adios2-hashing  {in_file} {out_file} {nbins} {write_inputbars}',
              MpiExecInfo(nprocs=self.config['nprocs'],
                          ppn=self.config['ppn'],
                          hostfile=self.jarvis.hostfile,

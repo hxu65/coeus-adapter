@@ -18,7 +18,7 @@ export PATH="${COEUS_Adapter/build/bin}:$PATH"
 ## 2. Create a Pipeline
 
 ### 2.1 install jarvis and initiate jarvis
-for the install and initiate jarvis, refer this page:
+for the install and initiate jarvis, refer these pages:<br>
 https://github.com/grc-iit/jarvis-cd/wiki <br>
 https://github.com/grc-iit/jarvis-cd/wiki/1.-Getting-Started
 
@@ -28,6 +28,7 @@ the hostfile.txt contain the node will be run for gray scott
 jarvis hostfile set [path-to-hostfile.txt]    
 ```
 ### 2.3 add jarvis repos to jarvis
+These repos contain the parameters and how to execute gray scoot
 ```
 jarvis repo add coeus-adapter/test/jarvis/jarvis_coeus
 ```

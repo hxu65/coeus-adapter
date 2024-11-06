@@ -19,7 +19,8 @@ export PATH="${COEUS_Adapter/build/bin}:$PATH"
 
 ### 2.1 install jarvis and initiate jarvis
 for the install and initiate jarvis, refer this page:
-https://github.com/grc-iit/jarvis-cd/wiki
+https://github.com/grc-iit/jarvis-cd/wiki <br>
+https://github.com/grc-iit/jarvis-cd/wiki/1.-Getting-Started
 
 ### 2.2 set the jarvis hostfile
 the hostfile.txt contain the node will be run for gray scott
@@ -45,9 +46,10 @@ jarvis pipeline env build
 
 ## 4. Add pkgs to the Pipeline
 
-Create a Jarvis pipeline with Gray Scott
+Create a Jarvis pipeline with Gray Scott,
+feel free to change the steps, ppn and nprocs.
 ```bash
-jarvis pipeline append adios2_gray_scott engine=bp5 out_file=/bp5/file/without/hashing/location steps=600 ppn=? nprocs=?
+jarvis pipeline append adios2_gray_scott engine=bp5 out_file=/bp5/file/without/hashing/location steps=? ppn=? nprocs=?
 jarvis pipeline append adios2_hashing engine=bp5 in_filename=bp5_location ppn=? nprocs=? out_filename=/the/location/for/bp5/with/hashing\values write_inputvars=yes
 
 ```

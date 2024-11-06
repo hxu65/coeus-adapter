@@ -33,6 +33,10 @@ std::string concatenateVectorToString(const std::vector<size_t> &vec) {
     return ss.str();
 }
 
+
+/*
+ * Print info to the user on how to invoke the application
+ */
 void printUsage()
 {
     std::cout
@@ -58,6 +62,7 @@ int main(int argc, char *argv[])
     MPI_Comm_split(MPI_COMM_WORLD, color, wrank, &comm);
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &comm_size);
+
     if (argc < 3)
     {
         std::cout << "Not enough arguments\n";
@@ -75,6 +80,7 @@ int main(int argc, char *argv[])
     if (argc >= 4)
     {
         int value = std::stoi(argv[3]);
+
     }
 
     if (argc >= 5)
@@ -93,12 +99,27 @@ int main(int argc, char *argv[])
     size_t start1;
     std::vector<double> u;
     std::vector<double> v;
+    int reader_beginstep_time = 0;
+
+    int reader_get_time = 0;
+    //
+    int reader_endstep_time = 0;
+    //
+    int writer_beginstep_time = 0;
+    //
+    int writer_put_time = 0;
+    //
+    int writer_endstep_time = 0;
+    //
+    int step_total_time = 0;
+    //
     int simStep = -5;
     // adios2 variable declarations
     adios2::Variable<double> var_u_in, var_v_in;
     adios2::Variable<int> var_step_in;
     adios2::Variable<int> var_step_out;
     adios2::Variable<double> var_u_out, var_v_out;
+
     adios2::ADIOS ad("adios2.xml", comm);
 
     // IO objects for reading and writing
@@ -120,12 +141,19 @@ int main(int argc, char *argv[])
 
     // read data step-by-step
     int stepAnalysis = 0;
-    auto hashing_start_time = std::chrono::high_resolution_clock::now();
+
+
+    auto total_step_start_time = std::chrono::high_resolution_clock::now();
     while (true)
     {
-        auto get_start_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+
+        auto reader_beginstep_start_time = std::chrono::high_resolution_clock::now();
         adios2::StepStatus read_status =
                 reader.BeginStep(adios2::StepMode::Read, 10.0f);
+        auto reader_beginstep_end_time = std::chrono::high_resolution_clock::now();
+        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(reader_beginstep_end_time - reader_beginstep_start_time );
+        reader_beginstep_time = get_time_cost.count() + reader_beginstep_time;
+        int clock1 = get_time_cost.count() + 1000;
         if (read_status == adios2::StepStatus::NotReady)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -136,6 +164,7 @@ int main(int argc, char *argv[])
             break;
         }
 
+        // int stepSimOut = reader.CurrentStep();
         int stepSimOut = stepAnalysis;
         // Inquire variable
         var_u_in = reader_io.InquireVariable<double>("U");
@@ -155,7 +184,6 @@ int main(int argc, char *argv[])
             // 1D decomposition
             count1 = shape[0] / comm_size;
             start1 = count1 * rank;
-            std::cout << "rank: " << rank << "; count1: " << count1 << " ;start1:" << start1 << std::endl;
             if (rank == comm_size - 1) {
                 // last process need to read all the rest of slices
                 count1 = shape[0] - count1 * (comm_size - 1);
@@ -188,20 +216,36 @@ int main(int argc, char *argv[])
                 {start1, 0, 0}, {count1, shape[1], shape[2]}));
 
         // Read adios2 data
+        auto reader_get_start_time = std::chrono::high_resolution_clock::now();
         reader.Get<double>(var_u_in, u);
         reader.Get<double>(var_v_in, v);
-
-
+        auto reader_get_end_time = std::chrono::high_resolution_clock::now();
+        get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(reader_get_end_time - reader_get_start_time );
+        reader_get_time = get_time_cost.count() + reader_get_time;
+        std::cout << "Get U: " << rank << " size: " << u.size()
+                  << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "
+                  << " Start: (" << concatenateVectorToString(var_u_in.Start()) << ") "
+                  << " Shape: (" << concatenateVectorToString(var_u_in.Shape()) << ") "
+                  << std::endl;
+        std::cout << "Get V: " << rank << " size: " << v.size()
+                  << " Count: (" << concatenateVectorToString(var_v_in.Count()) << ") "
+                  << " Start: (" << concatenateVectorToString(var_v_in.Start()) << ") "
+                  << " Shape: (" << concatenateVectorToString(var_v_in.Shape()) << ") "
+                  << std::endl;
         if (shouldIWrite)
         {
+            std::cout << "Get step: " << rank << std::endl;
             reader.Get<int>(var_step_in, &simStep);
         }
-
+        auto reader_endstep_start_time = std::chrono::high_resolution_clock::now();
         // End read step (let resources about step go)
         reader.EndStep();
-//        auto get_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-//        auto get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(get_end_time - get_start_time );
-//        std::cout << "@@@@rank:" << rank << ", get time: " <<  get_time_cost.count() << std::endl;
+        auto reader_endstep_end_time = std::chrono::high_resolution_clock::now();
+        get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(reader_endstep_end_time - reader_endstep_start_time  );
+        reader_endstep_time  = get_time_cost.count() + reader_endstep_time;
+
+
+        std::cout << "@@@@rank:" << rank << ", get time: " <<  clock1 << std::endl;
         if (!rank)
         {
             std::cout << "PDF Analysis step " << stepAnalysis
@@ -209,30 +253,49 @@ int main(int argc, char *argv[])
                       << " sim compute step " << simStep << std::endl;
         }
 
-//        auto put_step_start_time = std::chrono::high_resolution_clock::now();
+
+        auto writer_beginstep_start_time = std::chrono::high_resolution_clock::now();
         writer.BeginStep();
-//        auto put_start_time = std::chrono::high_resolution_clock::now();
+        auto writer_beginstep_end_time = std::chrono::high_resolution_clock::now();
+        get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_beginstep_end_time  - writer_beginstep_start_time );
+        writer_beginstep_time  = get_time_cost.count() + writer_beginstep_time;
+
+        auto writer_put_start_time = std::chrono::high_resolution_clock::now();
         writer.Put<double>(var_u_out, u.data());
         writer.Put<double>(var_v_out, v.data());
-//        auto put_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-//        auto put_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_end_time - put_start_time);
-//        std::cout << "@@@@@rank:" << rank << ", Put time: " <<  put_time_cost.count() << std::endl;
+
+        auto writer_put_end_time = std::chrono::high_resolution_clock::now();
+        get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_put_end_time  - writer_put_start_time );
+        writer_put_time  = get_time_cost.count() + writer_put_time;
+
+
+        auto writer_endstep_start_time = std::chrono::high_resolution_clock::now();
         writer.EndStep();
-//        auto put_step_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
-//        auto put_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(put_step_end_time - put_step_start_time);
-//        std::cout << "@@@@@rank:" << rank << ", Put Step time: " <<  put_step_time_cost.count() << std::endl;
+        auto writer_endstep_end_time = std::chrono::high_resolution_clock::now();
+        get_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(writer_endstep_end_time  - writer_endstep_start_time );
+        writer_endstep_time  = get_time_cost.count() + writer_endstep_time;
+
         ++stepAnalysis;
 
-    }
 
+    }
+    auto total_step_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
+    auto total_step_time_cost = std::chrono::duration_cast<std::chrono::milliseconds>(total_step_end_time - total_step_start_time);
+    step_total_time = total_step_time_cost.count();
+    std::cout << "rank:" << rank << ", reader_beginstep_time: " << reader_beginstep_time << std::endl;
+    std::cout << "rank:" << rank << ", reader_get_time: " << reader_get_time << std::endl;
+    std::cout << "rank:" << rank << ", reader_endstep_time: " << reader_endstep_time << std::endl;
+    std::cout << "rank:" << rank << ", writer_beginstep_time: " << writer_beginstep_time << std::endl;
+    std::cout << "rank:" << rank << ", writer_put_time : " << writer_put_time  << std::endl;
+    std::cout << "rank:" << rank << ", writer_endstep_time : " << writer_endstep_time  << std::endl;
+    std::cout << "rank:" << rank << ", step_total_time : " << step_total_time  << std::endl;
     // cleanup (close reader and writer)
     reader.Close();
     writer.Close();
     auto app_end_time = std::chrono::high_resolution_clock::now(); // Record end time of the application
     auto app_duration = std::chrono::duration_cast<std::chrono::milliseconds>(app_end_time - app_start_time);
-    auto hashing_duration = std::chrono::duration_cast<std::chrono::milliseconds>(app_end_time - hashing_start_time);
-    std::cout << "rank:" << rank << ", Hashing time: " <<  hashing_duration.count() << std::endl;
-    std::cout << "rank:" << rank << ", time: " <<  app_duration.count() << std::endl;
+
+    std::cout << "rank:" << rank << ", app duration time: " <<  app_duration.count() << std::endl;
     MPI_Barrier(comm);
     MPI_Finalize();
     return 0;

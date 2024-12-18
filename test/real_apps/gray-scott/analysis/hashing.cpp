@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         adios2::StepStatus read_status =
                 reader.BeginStep(adios2::StepMode::Read, 10.0f);
 
-        int clock1 = get_time_cost.count() + 1000;
+
         if (read_status == adios2::StepStatus::NotReady)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
             std::cout << "Get step: " << rank << std::endl;
             reader.Get<int>(var_step_in, &simStep);
         }
-/
+
         reader.EndStep();
 
 

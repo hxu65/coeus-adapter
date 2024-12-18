@@ -128,8 +128,7 @@ void Writer::write(int step, const GrayScott &sim, int rank)
         const std::vector<double> &u = sim.u_ghost();
         const std::vector<double> &v = sim.v_ghost();
 
-      std::cout << u.size() << " " << v.size() <<std::endl;
-      std::cout << var_u.SelectionSize() << " " << var_v.SelectionSize() <<std::endl;
+
 
       writer.BeginStep();
         writer.Put<int>(var_step, &step);

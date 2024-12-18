@@ -99,20 +99,7 @@ int main(int argc, char *argv[])
     size_t start1;
     std::vector<double> u;
     std::vector<double> v;
-    int reader_beginstep_time = 0;
 
-    int reader_get_time = 0;
-    //
-    int reader_endstep_time = 0;
-    //
-    int writer_beginstep_time = 0;
-    //
-    int writer_put_time = 0;
-    //
-    int writer_endstep_time = 0;
-    //
-    int step_total_time = 0;
-    //
     int simStep = -5;
     // adios2 variable declarations
     adios2::Variable<double> var_u_in, var_v_in;

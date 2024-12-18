@@ -73,23 +73,11 @@ int main(int argc, char *argv[])
     }
     std::string in_filename;
     std::string out_filename;
-    bool write_inputvars = false;
+    bool write_inputvars = true;
     in_filename = argv[1];
     out_filename = argv[2];
 
-    if (argc >= 4)
-    {
-        int value = std::stoi(argv[3]);
 
-    }
-
-    if (argc >= 5)
-    {
-        std::string value = argv[4];
-        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-        if (value == "yes")
-            write_inputvars = true;
-    }
     // set up dataset size
     std::size_t u_global_size, v_global_size;
     std::size_t u_local_size, v_local_size;
@@ -100,7 +88,6 @@ int main(int argc, char *argv[])
     std::vector<double> u;
     std::vector<double> v;
 
-    //
     int simStep = -5;
     // adios2 variable declarations
     adios2::Variable<double> var_u_in, var_v_in;
@@ -133,9 +120,9 @@ int main(int argc, char *argv[])
     while (true)
     {
 
+
         adios2::StepStatus read_status =
                 reader.BeginStep(adios2::StepMode::Read, 10.0f);
-
 
         if (read_status == adios2::StepStatus::NotReady)
         {
@@ -147,14 +134,15 @@ int main(int argc, char *argv[])
             break;
         }
 
-
+        // int stepSimOut = reader.CurrentStep();
         int stepSimOut = stepAnalysis;
-
+        // Inquire variable
         var_u_in = reader_io.InquireVariable<double>("U");
         var_v_in = reader_io.InquireVariable<double>("V");
         var_step_in = reader_io.InquireVariable<int>("step");
 
-
+        // Set the selection at the first step only, assuming that
+        // the variable dimensions do not change across timesteps
         if (firstStep) {
             shape = var_u_in.Shape();
             // Calculate global and local sizes of U and V
@@ -197,6 +185,8 @@ int main(int argc, char *argv[])
         var_v_in.SetSelection(adios2::Box<adios2::Dims>(
                 {start1, 0, 0}, {count1, shape[1], shape[2]}));
 
+        // Read adios2 data
+
         reader.Get<double>(var_u_in, u);
         reader.Get<double>(var_v_in, v);
 
@@ -215,10 +205,8 @@ int main(int argc, char *argv[])
             std::cout << "Get step: " << rank << std::endl;
             reader.Get<int>(var_step_in, &simStep);
         }
-
+        // End read step (let resources about step go)
         reader.EndStep();
-
-
 
         if (!rank)
         {
@@ -227,22 +215,14 @@ int main(int argc, char *argv[])
                       << " sim compute step " << simStep << std::endl;
         }
 
-
-//
         writer.BeginStep();
-//
-
         writer.Put<double>(var_u_out, u.data());
         writer.Put<double>(var_v_out, v.data());
-
-
         writer.EndStep();
-
-
         ++stepAnalysis;
 
-
     }
+
 
     // cleanup (close reader and writer)
     reader.Close();

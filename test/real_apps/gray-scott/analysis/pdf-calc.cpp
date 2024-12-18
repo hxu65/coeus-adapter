@@ -73,23 +73,11 @@ int main(int argc, char *argv[])
     }
     std::string in_filename;
     std::string out_filename;
-    bool write_inputvars = false;
+    bool write_inputvars = true;
     in_filename = argv[1];
     out_filename = argv[2];
 
-    if (argc >= 4)
-    {
-        int value = std::stoi(argv[3]);
 
-    }
-
-    if (argc >= 5)
-    {
-        std::string value = argv[4];
-        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-        if (value == "yes")
-            write_inputvars = true;
-    }
     // set up dataset size
     std::size_t u_global_size, v_global_size;
     std::size_t u_local_size, v_local_size;
@@ -227,23 +215,11 @@ int main(int argc, char *argv[])
                       << " sim compute step " << simStep << std::endl;
         }
 
-
-
         writer.BeginStep();
-
-
-
         writer.Put<double>(var_u_out, u.data());
         writer.Put<double>(var_v_out, v.data());
-
-
-
-
         writer.EndStep();
-
-
         ++stepAnalysis;
-
 
     }
 

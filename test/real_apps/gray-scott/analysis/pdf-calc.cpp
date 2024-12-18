@@ -129,8 +129,6 @@ int main(int argc, char *argv[])
     // read data step-by-step
     int stepAnalysis = 0;
 
-
-    auto total_step_start_time = std::chrono::high_resolution_clock::now();
     while (true)
     {
 
@@ -219,14 +217,9 @@ int main(int argc, char *argv[])
             std::cout << "Get step: " << rank << std::endl;
             reader.Get<int>(var_step_in, &simStep);
         }
-
         // End read step (let resources about step go)
         reader.EndStep();
 
-
-
-
-        std::cout << "@@@@rank:" << rank << ", get time: " <<  clock1 << std::endl;
         if (!rank)
         {
             std::cout << "PDF Analysis step " << stepAnalysis

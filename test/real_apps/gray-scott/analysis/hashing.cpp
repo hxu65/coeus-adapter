@@ -87,16 +87,14 @@ int main(int argc, char *argv[])
     size_t start1;
     std::vector<double> u;
     std::vector<double> v;
-
+    //
     int simStep = -5;
     // adios2 variable declarations
     adios2::Variable<double> var_u_in, var_v_in;
     adios2::Variable<int> var_step_in;
     adios2::Variable<int> var_step_out;
     adios2::Variable<double> var_u_out, var_v_out;
-
     adios2::ADIOS ad("adios2.xml", comm);
-
     // IO objects for reading and writing
     adios2::IO reader_io = ad.DeclareIO("SimulationOutput");
     adios2::IO writer_io = ad.DeclareIO("PDFAnalysisOutput");
@@ -119,11 +117,8 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-
-
         adios2::StepStatus read_status =
                 reader.BeginStep(adios2::StepMode::Read, 10.0f);
-
         if (read_status == adios2::StepStatus::NotReady)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -133,7 +128,6 @@ int main(int argc, char *argv[])
         {
             break;
         }
-
         // int stepSimOut = reader.CurrentStep();
         int stepSimOut = stepAnalysis;
         // Inquire variable
@@ -150,7 +144,6 @@ int main(int argc, char *argv[])
             u_local_size = u_global_size / comm_size;
             v_global_size = shape[0] * shape[1] * shape[2];
             v_local_size = v_global_size / comm_size;
-
             // 1D decomposition
             count1 = shape[0] / comm_size;
             start1 = count1 * rank;
@@ -189,7 +182,6 @@ int main(int argc, char *argv[])
 
         reader.Get<double>(var_u_in, u);
         reader.Get<double>(var_v_in, v);
-
         std::cout << "Get U: " << rank << " size: " << u.size()
                   << " Count: (" << concatenateVectorToString(var_u_in.Count()) << ") "
                   << " Start: (" << concatenateVectorToString(var_u_in.Start()) << ") "
@@ -214,15 +206,12 @@ int main(int argc, char *argv[])
                       << " processing sim output step " << stepSimOut
                       << " sim compute step " << simStep << std::endl;
         }
-
         writer.BeginStep();
         writer.Put<double>(var_u_out, u.data());
         writer.Put<double>(var_v_out, v.data());
         writer.EndStep();
         ++stepAnalysis;
-
     }
-
 
     // cleanup (close reader and writer)
     reader.Close();

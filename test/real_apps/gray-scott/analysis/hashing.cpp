@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
         reader.EndStep();
 
 
-        std::cout << "@@@@rank:" << rank << ", get time: " <<  clock1 << std::endl;
+
         if (!rank)
         {
             std::cout << "PDF Analysis step " << stepAnalysis
